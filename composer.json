@@ -16,8 +16,5 @@
     "psr-4": {
       "WC_Moneybird\\": "includes/"
     }
-  },
-  "scripts": {
-    "dump-autoload": "composer dump-autoload -o"
   }
 }
