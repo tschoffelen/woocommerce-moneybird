@@ -1,0 +1,115 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      - name: Extract version from plugin file
+        id: extract_version
+        run: |
+          VERSION=$(grep -m 1 "Version:" woocommerce-moneybird.php | awk '{print $3}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Create plugin zip
+        run: |
+          PLUGIN_SLUG="woocommerce-moneybird"
+          VERSION="${{ steps.extract_version.outputs.version }}"
+
+          # Create a temporary directory for the plugin
+          mkdir -p /tmp/$PLUGIN_SLUG
+
+          # Copy plugin files, excluding development files
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            --exclude='phpunit.xml' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='*.md' \
+            --exclude='.DS_Store' \
+            ./ /tmp/$PLUGIN_SLUG/
+
+          # Create the zip file
+          cd /tmp
+          zip -r "${PLUGIN_SLUG}-${VERSION}.zip" $PLUGIN_SLUG
+
+          # Move zip back to workspace
+          mv "${PLUGIN_SLUG}-${VERSION}.zip" $GITHUB_WORKSPACE/
+
+          echo "Created ${PLUGIN_SLUG}-${VERSION}.zip"
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release v$VERSION already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release v$VERSION does not exist"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete existing release if exists
+        if: steps.check_release.outputs.exists == 'true'
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          gh release delete "v$VERSION" --yes
+          git push --delete origin "v$VERSION" || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ steps.extract_version.outputs.version }}"
+          name: "Release v${{ steps.extract_version.outputs.version }}"
+          body: |
+            ## Sync to Moneybird v${{ steps.extract_version.outputs.version }}
+
+            WordPress plugin to sync WooCommerce orders to Moneybird.
+
+            ### Installation
+            1. Download the `woocommerce-moneybird-${{ steps.extract_version.outputs.version }}.zip` file below
+            2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+            3. Upload the zip file and activate the plugin
+            4. Go to WooCommerce → Settings → Moneybird to configure
+
+            ### Changelog
+            See commit history for changes in this release.
+          files: |
+            woocommerce-moneybird-${{ steps.extract_version.outputs.version }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
