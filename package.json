@@ -1,0 +1,15 @@
+{
+  "name": "sync-to-moneybird",
+  "version": "1.0.0",
+  "description": "Sync WooCommerce order invoices to Moneybird accounting software.",
+  "scripts": {
+    "start": "wp-env start",
+    "stop": "wp-env stop"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.33.1"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/includable/woocommerce-moneybird.git",
+  "author": "Thomas Schoffelen <hi@includable.com>"
+}
