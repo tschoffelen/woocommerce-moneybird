@@ -103,7 +103,7 @@ jobs:
             1. Download the `moneybird-for-woocommerce-${{ steps.extract_version.outputs.version }}.zip` file below
             2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
             3. Upload the zip file and activate the plugin
-            4. Go to WooCommerce → Settings → Moneybird to configure
+            4. Go to WooCommerce → Moneybird to configure
 
             ### Changelog
             See commit history for changes in this release.
