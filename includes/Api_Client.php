@@ -122,6 +122,45 @@ class Api_Client {
     }
 
     /**
+     * Find contact by email
+     */
+    public function find_contact_by_email($email) {
+        if (empty($this->administration_id)) {
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+        }
+
+        $contacts = $this->get('/' . $this->administration_id . '/contacts.json', [
+            'query' => $email
+        ]);
+
+        if (is_wp_error($contacts)) {
+            return $contacts;
+        }
+
+        // Find exact email match
+        foreach ($contacts as $contact) {
+            if (isset($contact['email']) && strtolower($contact['email']) === strtolower($email)) {
+                return $contact;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a contact
+     */
+    public function create_contact($data) {
+        if (empty($this->administration_id)) {
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+        }
+
+        return $this->post('/' . $this->administration_id . '/contacts.json', [
+            'contact' => $data
+        ]);
+    }
+
+    /**
      * Create an external sales invoice
      */
     public function create_external_sales_invoice($data) {

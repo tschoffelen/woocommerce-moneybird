@@ -13,7 +13,28 @@ if (!defined('ABSPATH')) {
 class Order_Metabox {
     public function __construct() {
         add_action('add_meta_boxes', [$this, 'add_metabox']);
-        add_action('admin_post_wc_moneybird_manual_sync', [$this, 'handle_manual_sync']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_scripts']);
+        add_action('wp_ajax_wc_moneybird_manual_sync', [$this, 'handle_manual_sync_ajax']);
+    }
+
+    public function enqueue_scripts($hook) {
+        // Only load on order edit screens
+        if (!in_array($hook, ['post.php', 'woocommerce_page_wc-orders'])) {
+            return;
+        }
+
+        global $post;
+        if ($post && $post->post_type !== 'shop_order') {
+            return;
+        }
+
+        wp_enqueue_script(
+            'wc-moneybird-admin-order',
+            WC_MONEYBIRD_PLUGIN_URL . 'assets/js/admin-order.js',
+            ['jquery'],
+            WC_MONEYBIRD_VERSION,
+            true
+        );
     }
 
     public function add_metabox() {
@@ -43,6 +64,9 @@ class Order_Metabox {
         if (!$order) {
             return;
         }
+		if(!$order->get_status() || $order->get_status() === 'draft'){
+			return;
+		}
 
         $order_id = $order->get_id();
         $invoice_id = get_post_meta($order_id, '_moneybird_invoice_id', true);
@@ -77,7 +101,7 @@ class Order_Metabox {
                     <?php
                     $administration_id = get_option('wc_moneybird_administration_id');
                     $url = sprintf(
-                        'https://moneybird.com/%s/sales_invoices/%s',
+                        'https://moneybird.com/%s/external_sales_invoices/%s',
                         $administration_id,
                         $invoice_id
                     );
@@ -103,14 +127,13 @@ class Order_Metabox {
                 </p>
 
                 <p>
-                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                        <?php wp_nonce_field('wc_moneybird_manual_sync', 'wc_moneybird_manual_sync_nonce'); ?>
-                        <input type="hidden" name="action" value="wc_moneybird_manual_sync">
-                        <input type="hidden" name="order_id" value="<?php echo esc_attr($order_id); ?>">
-                        <button type="submit" class="button button-primary">
-                            <?php esc_html_e('Retry Sync', 'woocommerce-moneybird'); ?>
-                        </button>
-                    </form>
+                    <button type="button"
+                            class="button button-primary wc-moneybird-sync-button"
+                            data-order-id="<?php echo esc_attr($order_id); ?>"
+                            data-nonce="<?php echo esc_attr(wp_create_nonce('wc_moneybird_manual_sync_' . $order_id)); ?>">
+                        <?php esc_html_e('Retry Sync', 'woocommerce-moneybird'); ?>
+                    </button>
+                    <span class="wc-moneybird-sync-status"></span>
                 </p>
 
             <?php else: ?>
@@ -130,14 +153,13 @@ class Order_Metabox {
                 </p>
 
                 <p>
-                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                        <?php wp_nonce_field('wc_moneybird_manual_sync', 'wc_moneybird_manual_sync_nonce'); ?>
-                        <input type="hidden" name="action" value="wc_moneybird_manual_sync">
-                        <input type="hidden" name="order_id" value="<?php echo esc_attr($order_id); ?>">
-                        <button type="submit" class="button button-secondary">
-                            <?php esc_html_e('Sync Now', 'woocommerce-moneybird'); ?>
-                        </button>
-                    </form>
+                    <button type="button"
+                            class="button button-secondary wc-moneybird-sync-button"
+                            data-order-id="<?php echo esc_attr($order_id); ?>"
+                            data-nonce="<?php echo esc_attr(wp_create_nonce('wc_moneybird_manual_sync_' . $order_id)); ?>">
+                        <?php esc_html_e('Sync Now', 'woocommerce-moneybird'); ?>
+                    </button>
+                    <span class="wc-moneybird-sync-status"></span>
                 </p>
             <?php endif; ?>
         </div>
@@ -158,35 +180,69 @@ class Order_Metabox {
         <?php
     }
 
-    public function handle_manual_sync() {
-        if (!isset($_POST['wc_moneybird_manual_sync_nonce']) ||
-            !wp_verify_nonce($_POST['wc_moneybird_manual_sync_nonce'], 'wc_moneybird_manual_sync')) {
-            wp_die(esc_html__('Security check failed', 'woocommerce-moneybird'));
-        }
-
-        if (!current_user_can('edit_shop_orders')) {
-            wp_die(esc_html__('You do not have permission to sync orders', 'woocommerce-moneybird'));
-        }
-
+    public function handle_manual_sync_ajax() {
+        // Verify nonce
         $order_id = intval($_POST['order_id']);
-        $order = wc_get_order($order_id);
+        $nonce = sanitize_text_field($_POST['nonce']);
 
+        if (!wp_verify_nonce($nonce, 'wc_moneybird_manual_sync_' . $order_id)) {
+            wp_send_json_error([
+                'message' => __('Security check failed', 'woocommerce-moneybird')
+            ]);
+        }
+
+        // Check permissions
+        if (!current_user_can('edit_shop_orders')) {
+            wp_send_json_error([
+                'message' => __('You do not have permission to sync orders', 'woocommerce-moneybird')
+            ]);
+        }
+
+        // Get order
+        $order = wc_get_order($order_id);
         if (!$order) {
-            wp_die(esc_html__('Order not found', 'woocommerce-moneybird'));
+            wp_send_json_error([
+                'message' => __('Order not found', 'woocommerce-moneybird')
+            ]);
         }
 
         // Clear existing invoice ID to allow re-sync
         delete_post_meta($order_id, '_moneybird_invoice_id');
 
-        $handler = new Order_Handler();
-        $handler->sync_order($order);
+        // Perform sync
+        try {
+            $handler = new Order_Handler();
+            $handler->sync_order($order);
 
-        wp_safe_redirect(
-            add_query_arg(
-                ['post' => $order_id, 'action' => 'edit', 'moneybird_synced' => '1'],
-                admin_url('post.php')
-            )
-        );
-        exit;
+            // Check if sync was successful
+            $invoice_id = get_post_meta($order_id, '_moneybird_invoice_id', true);
+
+            if (!empty($invoice_id)) {
+                wp_send_json_success([
+                    'message' => __('Order synced successfully!', 'woocommerce-moneybird')
+                ]);
+            } else {
+                // Check sync log for error
+                global $wpdb;
+                $last_log = $wpdb->get_row(
+                    $wpdb->prepare(
+                        "SELECT * FROM {$wpdb->prefix}wc_moneybird_sync_log WHERE order_id = %d ORDER BY synced_at DESC LIMIT 1",
+                        $order_id
+                    )
+                );
+
+                $error_message = $last_log && $last_log->status === 'error'
+                    ? $last_log->message
+                    : __('Sync failed. Check the sync history for details.', 'woocommerce-moneybird');
+
+                wp_send_json_error([
+                    'message' => $error_message
+                ]);
+            }
+        } catch (\Exception $e) {
+            wp_send_json_error([
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

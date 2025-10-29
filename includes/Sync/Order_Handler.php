@@ -12,9 +12,11 @@ if (!defined('ABSPATH')) {
  */
 class Order_Handler
 {
+	private $tax_rates_cache = null;
+
 	public function __construct()
 	{
-		add_action('woocommerce_order_status_changed', [$this, 'handle_order_status_change'], 10, 4);
+		add_action('woocommerce_order_status_changed', [$this, 'handle_order_status_change'], 40, 3);
 	}
 
 	/**
@@ -32,7 +34,7 @@ class Order_Handler
 	/**
 	 * Handle order status changes
 	 */
-	public function handle_order_status_change($order_id, $old_status, $new_status, $order)
+	public function handle_order_status_change($order_id, $old_status, $new_status)
 	{
 		// Check if plugin is configured
 		if (!$this->is_configured()) {
@@ -51,15 +53,15 @@ class Order_Handler
 			return;
 		}
 
-		$this->sync_order($order);
+		$this->sync_order($order_id);
 	}
 
 	/**
 	 * Sync order to Moneybird
 	 */
-	public function sync_order($order)
+	public function sync_order($order_id)
 	{
-		$order_id = $order->get_id();
+		$order = wc_get_order($order_id);
 
 		// Double-check configuration
 		if (!$this->is_configured()) {
@@ -68,12 +70,20 @@ class Order_Handler
 		}
 
 		try {
-			$invoice_data = $this->prepare_invoice_data($order);
 			$api = new Api_Client();
+
+			// Step 1: Get or create contact
+			$contact_id = $this->get_or_create_contact($order, $api);
+			if (is_wp_error($contact_id)) {
+				throw new \Exception($contact_id->get_error_message());
+			}
+
+			// Step 2: Prepare and create invoice with contact_id
+			$invoice_data = $this->prepare_invoice_data($order, $contact_id);
 			$result = $api->create_external_sales_invoice($invoice_data);
 
 			if (is_wp_error($result)) {
-				throw new \Exception(json_encode($result->get_error_message()));
+				throw new \Exception($result->get_error_message());
 			}
 
 			// Save the invoice ID
@@ -92,16 +102,39 @@ class Order_Handler
 	}
 
 	/**
-	 * Prepare invoice data for Moneybird
+	 * Get or create a Moneybird contact for the order customer
 	 */
-	private function prepare_invoice_data($order)
+	private function get_or_create_contact($order, $api)
 	{
-		$ledger_account_id = get_option('wc_moneybird_ledger_account_id');
-		$tax_rate_id = get_option('wc_moneybird_tax_rate_id');
+		$customer_id = $order->get_customer_id();
+		$email = $order->get_billing_email();
 
-		$order_id = $order->get_id();
-		$order_date = $order->get_date_created();
+		// Check if we have a stored contact ID for this customer
+		if ($customer_id > 0) {
+			$stored_contact_id = get_user_meta($customer_id, '_moneybird_contact_id', true);
+			if (!empty($stored_contact_id)) {
+				return $stored_contact_id;
+			}
+		}
 
+		// Try to find existing contact by email
+		$existing_contact = $api->find_contact_by_email($email);
+		if (is_wp_error($existing_contact)) {
+			return $existing_contact;
+		}
+
+		if ($existing_contact) {
+			$contact_id = $existing_contact['id'];
+
+			// Store for future use
+			if ($customer_id > 0) {
+				update_user_meta($customer_id, '_moneybird_contact_id', $contact_id);
+			}
+
+			return $contact_id;
+		}
+
+		// Create new contact
 		$contact_data = [
 			'company_name' => $this->get_company_name($order),
 			'firstname' => $order->get_billing_first_name(),
@@ -111,9 +144,36 @@ class Order_Handler
 			'zipcode' => $order->get_billing_postcode(),
 			'city' => $order->get_billing_city(),
 			'country' => $order->get_billing_country(),
-			'email' => $order->get_billing_email(),
+			'email' => $email,
 			'phone' => $order->get_billing_phone(),
+			'customer_id' => 'wc_' . ($customer_id > 0 ? $customer_id : $order->get_id()), // External reference
 		];
+
+		$result = $api->create_contact($contact_data);
+
+		if (is_wp_error($result)) {
+			return $result;
+		}
+
+		$contact_id = $result['id'];
+
+		// Store for future use
+		if ($customer_id > 0) {
+			update_user_meta($customer_id, '_moneybird_contact_id', $contact_id);
+		}
+
+		return $contact_id;
+	}
+
+	/**
+	 * Prepare invoice data for Moneybird
+	 */
+	private function prepare_invoice_data($order, $contact_id)
+	{
+		$ledger_account_id = get_option('wc_moneybird_ledger_account_id');
+
+		$order_id = $order->get_id();
+		$order_date = $order->get_date_created();
 
 		$details_attributes = [];
 
@@ -126,8 +186,8 @@ class Order_Handler
 
 			$price = $quantity > 0 ? ($line_total / $quantity) : 0;
 
-			// Calculate expected tax for the configured tax rate
-			$tax_rate_to_use = $this->determine_tax_rate($line_total, $line_tax, $tax_rate_id);
+			// Find matching tax rate from Moneybird
+			$tax_rate_to_use = $this->determine_tax_rate($line_total, $line_tax);
 
 			$details_attributes[] = [
 				'description' => $item->get_name(),
@@ -143,7 +203,7 @@ class Order_Handler
 			$shipping_total = $order->get_shipping_total();
 			$shipping_tax = $order->get_shipping_tax();
 
-			$tax_rate_to_use = $this->determine_tax_rate($shipping_total, $shipping_tax, $tax_rate_id);
+			$tax_rate_to_use = $this->determine_tax_rate($shipping_total, $shipping_tax);
 
 			$details_attributes[] = [
 				'description' => __('Shipping', 'woocommerce-moneybird') . ': ' . $order->get_shipping_method(),
@@ -159,7 +219,7 @@ class Order_Handler
 			$fee_total = $fee->get_total();
 			$fee_tax = $fee->get_total_tax();
 
-			$tax_rate_to_use = $this->determine_tax_rate($fee_total, $fee_tax, $tax_rate_id);
+			$tax_rate_to_use = $this->determine_tax_rate($fee_total, $fee_tax);
 
 			$details_attributes[] = [
 				'description' => $fee->get_name(),
@@ -171,10 +231,11 @@ class Order_Handler
 		}
 
 		return [
+			'contact_id' => $contact_id,
 			'reference' => 'WC-' . $order_id,
 			'date' => $order_date->format('Y-m-d'),
 			'due_date' => $order_date->modify('+30 days')->format('Y-m-d'),
-			'contact' => $contact_data,
+			'currency' => $order->get_currency(),
 			'details_attributes' => $details_attributes,
 			'source' => 'WooCommerce',
 			'source_url' => $order->get_edit_order_url(),
@@ -182,45 +243,49 @@ class Order_Handler
 	}
 
 	/**
-	 * Determine the appropriate tax rate ID
-	 * Only use the configured tax rate if the tax amount matches what we'd expect
+	 * Determine the appropriate tax rate ID by finding a matching rate in Moneybird
+	 *
+	 * @param float $subtotal Line item subtotal (before tax)
+	 * @param float $tax_amount Tax amount for this line item
+	 * @throws \Exception If no matching tax rate is found in Moneybird
+	 * @return string Tax rate ID from Moneybird
 	 */
-	private function determine_tax_rate($subtotal, $tax_amount, $configured_tax_rate_id)
+	private function determine_tax_rate($subtotal, $tax_amount)
 	{
-		if (empty($configured_tax_rate_id) || $tax_amount == 0) {
-			return null;
+		// Calculate the actual tax percentage from the order
+		if ($subtotal == 0) {
+			$actual_percentage = 0;
+		} else {
+			$actual_percentage = round(($tax_amount / $subtotal) * 100, 2);
 		}
 
-		// Get the configured tax rate percentage
-		$api = new Api_Client();
-		$tax_rates = $api->get_tax_rates();
+		// Get all available tax rates from Moneybird (cached)
+		if ($this->tax_rates_cache === null) {
+			$api = new Api_Client();
+			$this->tax_rates_cache = $api->get_tax_rates();
 
-		if (is_wp_error($tax_rates)) {
-			return null;
-		}
-
-		$configured_rate = null;
-		foreach ($tax_rates as $rate) {
-			if ($rate['id'] == $configured_tax_rate_id) {
-				$configured_rate = floatval($rate['percentage']);
-				break;
+			if (is_wp_error($this->tax_rates_cache)) {
+				throw new \Exception('Failed to fetch tax rates from Moneybird: ' . $this->tax_rates_cache->get_error_message());
 			}
 		}
 
-		if ($configured_rate === null) {
-			return null;
+		// Find matching tax rate (with tolerance for rounding differences)
+		$tolerance = 0.2; // Allow 0.2% difference for rounding
+		foreach ($this->tax_rates_cache as $rate) {
+			$rate_percentage = floatval($rate['percentage']);
+
+			if (abs($rate_percentage - $actual_percentage) <= $tolerance) {
+				return $rate['id'];
+			}
 		}
 
-		// Calculate expected tax
-		$expected_tax = round(($subtotal * $configured_rate) / 100, 2);
-		$actual_tax = round(floatval($tax_amount), 2);
-
-		// If they match (within a small margin), use the configured rate
-		if (abs($expected_tax - $actual_tax) < 0.02) {
-			return $configured_tax_rate_id;
-		}
-
-		return null;
+		// No matching tax rate found - this is an error condition
+		throw new \Exception(
+			sprintf(
+				__('No matching tax rate found in Moneybird for %.2f%%. Please add this tax rate in Moneybird or adjust your WooCommerce tax settings.', 'woocommerce-moneybird'),
+				$actual_percentage
+			)
+		);
 	}
 
 	/**
@@ -246,7 +311,7 @@ class Order_Handler
 		$invoice_id = $result['id'];
 
 		$url = sprintf(
-			'https://moneybird.com/%s/sales_invoices/%s',
+			'https://moneybird.com/%s/external_sales_invoices/%s',
 			$administration_id,
 			$invoice_id
 		);

@@ -69,6 +69,15 @@ class Plugin {
             'wc-moneybird-history',
             [$this, 'render_history_page']
         );
+
+        add_submenu_page(
+            'wc-moneybird',
+            __('Debug Info', 'woocommerce-moneybird'),
+            __('Debug Info', 'woocommerce-moneybird'),
+            'manage_woocommerce',
+            'wc-moneybird-debug',
+            [$this, 'render_debug_page']
+        );
     }
 
     public function enqueue_admin_assets($hook) {
@@ -92,5 +101,10 @@ class Plugin {
     public function render_history_page() {
         $history = new Admin\Sync_History();
         $history->render();
+    }
+
+    public function render_debug_page() {
+        $debug = new Admin\Debug();
+        $debug->render();
     }
 }
