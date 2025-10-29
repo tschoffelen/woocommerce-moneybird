@@ -1,2 +1,26 @@
+# Dependencies
 /vendor
 /node_modules
+
+# WordPress
+.wp-env.json
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build files
+*.zip
+/dist
+
+# Test coverage
+/coverage

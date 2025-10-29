@@ -1,0 +1,260 @@
+/* Moneybird Sync Admin Styles */
+
+.wc-moneybird-settings,
+.wc-moneybird-history {
+    max-width: 1200px;
+}
+
+/* Card Layout */
+.wc-moneybird-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.wc-moneybird-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.wc-moneybird-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 16px 0 8px;
+}
+
+/* Setup Wizard */
+.wc-moneybird-setup-wizard {
+    margin-top: 20px;
+}
+
+.wc-moneybird-steps {
+    margin-top: 24px;
+}
+
+.wc-moneybird-steps .step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: #f6f7f7;
+    border-radius: 4px;
+}
+
+.wc-moneybird-steps .step-number {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wc-moneybird-steps .step-content {
+    flex: 1;
+    padding-top: 6px;
+}
+
+.wc-moneybird-steps .step-content h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.wc-moneybird-steps .step-content ol,
+.wc-moneybird-steps .step-content ul {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.wc-moneybird-steps .step-content li {
+    margin: 8px 0;
+}
+
+.wc-moneybird-steps .step-content ul ul {
+    list-style-type: circle;
+    margin-left: 20px;
+}
+
+.wc-moneybird-steps .form-table {
+    margin-top: 16px;
+    border-radius: 4px;
+}
+
+/* Connection Status */
+.wc-moneybird-connection-status {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    border-radius: 4px;
+}
+
+.wc-moneybird-connection-status h3 {
+    margin-top: 0;
+}
+
+.wc-moneybird-connection-status .dashicons {
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* Status Indicators */
+.wc-moneybird-status-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #00a32a;
+    font-weight: 500;
+}
+
+.wc-moneybird-status-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #d63638;
+    font-weight: 500;
+}
+
+.wc-moneybird-status-success .dashicons,
+.wc-moneybird-status-error .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Statistics */
+.wc-moneybird-stats {
+    margin-top: 24px;
+    padding: 20px;
+    background: #f6f7f7;
+    border-radius: 4px;
+}
+
+.wc-moneybird-stats h2 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.wc-moneybird-stats p {
+    margin: 12px 0;
+}
+
+.wc-moneybird-stat-success {
+    color: #00a32a;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.wc-moneybird-stat-error {
+    color: #d63638;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Table Styling */
+.wc-moneybird-history table {
+    margin-top: 20px;
+}
+
+.wc-moneybird-history table a {
+    text-decoration: none;
+}
+
+.wc-moneybird-history table a:hover {
+    text-decoration: underline;
+}
+
+.wc-moneybird-history table .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+.wc-moneybird-history table .dashicons-external {
+    margin-left: 4px;
+}
+
+/* Form Elements */
+.wc-moneybird-settings input[type="text"],
+.wc-moneybird-settings select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.wc-moneybird-settings .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.wc-moneybird-settings .form-table td {
+    padding: 15px 10px;
+}
+
+.wc-moneybird-settings .description {
+    margin-top: 8px;
+    display: block;
+}
+
+/* Buttons */
+.wc-moneybird-settings .submit {
+    display: flex;
+    gap: 12px;
+    padding-top: 0;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .wc-moneybird-steps .step {
+        flex-direction: column;
+    }
+
+    .wc-moneybird-settings .form-table th {
+        width: auto;
+        display: block;
+        padding: 10px 0;
+    }
+
+    .wc-moneybird-settings .form-table td {
+        display: block;
+        padding: 10px 0 20px;
+    }
+
+    .wc-moneybird-settings input[type="text"],
+    .wc-moneybird-settings select {
+        max-width: 100%;
+    }
+}
+
+/* Success/Error Messages */
+.wc-moneybird-settings .notice {
+    margin: 20px 0;
+}
+
+/* Loading States */
+.wc-moneybird-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2271b1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
