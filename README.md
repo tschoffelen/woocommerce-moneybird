@@ -88,52 +88,6 @@ The local environment includes:
 - WooCommerce 10.3.3
 - The plugin automatically activated
 
-### Project Structure
-
-```
-woocommerce-moneybird/
-├── assets/
-│   └── css/
-│       └── admin.css          # Admin styling
-├── includes/
-│   ├── admin/
-│   │   ├── class-settings.php       # Settings page
-│   │   └── class-sync-history.php   # Sync history page
-│   ├── sync/
-│   │   └── class-order-handler.php  # Order sync logic
-│   ├── class-api-client.php         # Moneybird API client
-│   ├── class-installer.php          # Database setup
-│   └── class-plugin.php             # Main plugin class
-├── tests/
-│   ├── bootstrap.php
-│   ├── test-api-client.php
-│   └── test-installer.php
-├── woocommerce-moneybird.php        # Main plugin file
-├── readme.txt                        # WordPress.org readme
-└── composer.json
-```
-
-## API Integration
-
-The plugin integrates with the following Moneybird API endpoints:
-
-- `GET /api/v2/administrations.json` - Retrieve administrations
-- `GET /api/v2/{id}/sales_invoices.json` - Verify permissions
-- `GET /api/v2/{id}/ledger_accounts.json` - Retrieve ledger accounts
-- `GET /api/v2/{id}/tax_rates.json` - Retrieve tax rates
-- `POST /api/v2/{id}/external_sales_invoices.json` - Create external sales invoices
-
-## Security
-
-The plugin follows WordPress security best practices:
-
-- ✓ Nonce verification for all form submissions
-- ✓ Capability checks (`manage_woocommerce`)
-- ✓ Input sanitization with `sanitize_text_field()`
-- ✓ Output escaping with `esc_html()`, `esc_attr()`, `esc_url()`
-- ✓ Prepared SQL statements with `$wpdb->prepare()`
-- ✓ Direct file access prevention with `ABSPATH` checks
-
 ## FAQ
 
 ### Can I sync existing orders?
@@ -164,4 +118,4 @@ This plugin is licensed under the MIT License. See [LICENSE](LICENSE) for detail
 
 ## Support
 
-For issues and questions, please use the [GitHub Issues](https://github.com/includable/woocommerce-moneybird/issues) page.
+For issues and questions, please use the [GitHub Issues](https://github.com/includable/moneybird-for-woocommerce/issues) page.

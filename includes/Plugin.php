@@ -34,17 +34,18 @@ class Plugin {
     }
 
     public function admin_notices() {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just displaying a success message, no data processing
         if (isset($_GET['moneybird_synced']) && $_GET['moneybird_synced'] === '1') {
             echo '<div class="notice notice-success is-dismissible"><p>' .
-                 esc_html__('Order synced to Moneybird successfully!', 'woocommerce-moneybird') .
+                 esc_html__('Order synced to Moneybird successfully!', 'moneybird-for-woocommerce') .
                  '</p></div>';
         }
     }
 
     public function add_admin_menu() {
         add_menu_page(
-            __('Moneybird Sync', 'woocommerce-moneybird'),
-            __('Moneybird', 'woocommerce-moneybird'),
+            __('Moneybird Sync', 'moneybird-for-woocommerce'),
+            __('Moneybird', 'moneybird-for-woocommerce'),
             'manage_woocommerce',
             'wc-moneybird',
             [$this, 'render_main_page'],
@@ -54,8 +55,8 @@ class Plugin {
 
         add_submenu_page(
             'wc-moneybird',
-            __('Settings', 'woocommerce-moneybird'),
-            __('Settings', 'woocommerce-moneybird'),
+            __('Settings', 'moneybird-for-woocommerce'),
+            __('Settings', 'moneybird-for-woocommerce'),
             'manage_woocommerce',
             'wc-moneybird',
             [$this, 'render_main_page']
@@ -63,20 +64,11 @@ class Plugin {
 
         add_submenu_page(
             'wc-moneybird',
-            __('Sync History', 'woocommerce-moneybird'),
-            __('Sync History', 'woocommerce-moneybird'),
+            __('Sync History', 'moneybird-for-woocommerce'),
+            __('Sync History', 'moneybird-for-woocommerce'),
             'manage_woocommerce',
             'wc-moneybird-history',
             [$this, 'render_history_page']
-        );
-
-        add_submenu_page(
-            'wc-moneybird',
-            __('Debug Info', 'woocommerce-moneybird'),
-            __('Debug Info', 'woocommerce-moneybird'),
-            'manage_woocommerce',
-            'wc-moneybird-debug',
-            [$this, 'render_debug_page']
         );
     }
 
@@ -101,10 +93,5 @@ class Plugin {
     public function render_history_page() {
         $history = new Admin\Sync_History();
         $history->render();
-    }
-
-    public function render_debug_page() {
-        $debug = new Admin\Debug();
-        $debug->render();
     }
 }

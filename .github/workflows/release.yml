@@ -25,7 +25,7 @@ jobs:
       - name: Extract version from plugin file
         id: extract_version
         run: |
-          VERSION=$(grep -m 1 "Version:" woocommerce-moneybird.php | awk '{print $3}')
+          VERSION=$(grep -m 1 "Version:" moneybird-for-woocommerce.php | awk '{print $3}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
 
@@ -34,7 +34,7 @@ jobs:
 
       - name: Create plugin zip
         run: |
-          PLUGIN_SLUG="woocommerce-moneybird"
+          PLUGIN_SLUG="moneybird-for-woocommerce"
           VERSION="${{ steps.extract_version.outputs.version }}"
 
           # Create a temporary directory for the plugin
@@ -100,7 +100,7 @@ jobs:
             WordPress plugin to sync WooCommerce orders to Moneybird.
 
             ### Installation
-            1. Download the `woocommerce-moneybird-${{ steps.extract_version.outputs.version }}.zip` file below
+            1. Download the `moneybird-for-woocommerce-${{ steps.extract_version.outputs.version }}.zip` file below
             2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
             3. Upload the zip file and activate the plugin
             4. Go to WooCommerce → Settings → Moneybird to configure
@@ -108,7 +108,7 @@ jobs:
             ### Changelog
             See commit history for changes in this release.
           files: |
-            woocommerce-moneybird-${{ steps.extract_version.outputs.version }}.zip
+            moneybird-for-woocommerce-${{ steps.extract_version.outputs.version }}.zip
           draft: false
           prerelease: false
         env:

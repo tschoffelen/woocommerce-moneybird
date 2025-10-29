@@ -19,7 +19,9 @@ delete_option('wc_moneybird_sync_on_status');
 // Delete sync log table
 global $wpdb;
 $table_name = $wpdb->prefix . 'wc_moneybird_sync_log';
+// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 $wpdb->query("DROP TABLE IF EXISTS {$table_name}");
 
 // Delete post meta
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ('_moneybird_invoice_id', '_moneybird_synced_at')");

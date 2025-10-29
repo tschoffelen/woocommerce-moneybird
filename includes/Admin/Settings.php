@@ -20,7 +20,7 @@ class Settings {
         $administration_id = get_option('wc_moneybird_administration_id');
 
         echo '<div class="wrap wc-moneybird-settings">';
-        echo '<h1>' . esc_html__('Moneybird Sync Settings', 'woocommerce-moneybird') . '</h1>';
+        echo '<h1>' . esc_html__('Moneybird Sync Settings', 'moneybird-for-woocommerce') . '</h1>';
 
         // Display settings errors/updates
         settings_errors('wc_moneybird');
@@ -38,23 +38,23 @@ class Settings {
         ?>
         <div class="wc-moneybird-setup-wizard">
             <div class="wc-moneybird-card">
-                <h2><?php esc_html_e('Welcome to Moneybird Sync', 'woocommerce-moneybird'); ?></h2>
-                <p><?php esc_html_e('Let\'s get you connected to Moneybird. Follow these steps:', 'woocommerce-moneybird'); ?></p>
+                <h2><?php esc_html_e('Welcome to Moneybird Sync', 'moneybird-for-woocommerce'); ?></h2>
+                <p><?php esc_html_e('Let\'s get you connected to Moneybird. Follow these steps:', 'moneybird-for-woocommerce'); ?></p>
 
                 <div class="wc-moneybird-steps">
                     <div class="step">
                         <div class="step-number">1</div>
                         <div class="step-content">
-                            <h3><?php esc_html_e('Create a Moneybird API Token', 'woocommerce-moneybird'); ?></h3>
+                            <h3><?php esc_html_e('Create a Moneybird API Token', 'moneybird-for-woocommerce'); ?></h3>
                             <ol>
-                                <li><?php esc_html_e('Log in to your Moneybird account', 'woocommerce-moneybird'); ?></li>
-                                <li><?php esc_html_e('Go to Administration Settings > External Applications', 'woocommerce-moneybird'); ?></li>
-                                <li><?php esc_html_e('Click "Create API Token"', 'woocommerce-moneybird'); ?></li>
+                                <li><?php esc_html_e('Log in to your Moneybird account', 'moneybird-for-woocommerce'); ?></li>
+                                <li><?php esc_html_e('Go to Administration Settings > External Applications', 'moneybird-for-woocommerce'); ?></li>
+                                <li><?php esc_html_e('Click "Create API Token"', 'moneybird-for-woocommerce'); ?></li>
                                 <li>
-                                    <?php esc_html_e('Select the following permissions:', 'woocommerce-moneybird'); ?>
-                                    <?php esc_html_e('Sales invoices', 'woocommerce-moneybird'); ?>
+                                    <?php esc_html_e('Select the following permissions:', 'moneybird-for-woocommerce'); ?>
+                                    <?php esc_html_e('Sales invoices', 'moneybird-for-woocommerce'); ?>
                                 </li>
-                                <li><?php esc_html_e('Copy the generated token', 'woocommerce-moneybird'); ?></li>
+                                <li><?php esc_html_e('Copy the generated token', 'moneybird-for-woocommerce'); ?></li>
                             </ol>
                         </div>
                     </div>
@@ -62,7 +62,7 @@ class Settings {
                     <div class="step">
                         <div class="step-number">2</div>
                         <div class="step-content">
-                            <h3><?php esc_html_e('Enter Your API Token', 'woocommerce-moneybird'); ?></h3>
+                            <h3><?php esc_html_e('Enter Your API Token', 'moneybird-for-woocommerce'); ?></h3>
                             <form method="post" action="">
                                 <?php wp_nonce_field('wc_moneybird_setup', 'wc_moneybird_setup_nonce'); ?>
 
@@ -70,15 +70,15 @@ class Settings {
                                                    id="api_token"
                                                    name="api_token"
                                                    class="regular-text"
-                                                   placeholder="<?php esc_attr_e('Paste your API token here', 'woocommerce-moneybird'); ?>"
+                                                   placeholder="<?php esc_attr_e('Paste your API token here', 'moneybird-for-woocommerce'); ?>"
                                                    required>
                                             <p class="description">
-                                                <?php esc_html_e('Your API token will be securely stored and used to communicate with Moneybird.', 'woocommerce-moneybird'); ?>
+                                                <?php esc_html_e('Your API token will be securely stored and used to communicate with Moneybird.', 'moneybird-for-woocommerce'); ?>
                                             </p>
                               
                                 <p class="submit">
                                     <button type="submit" name="action" value="setup" class="button button-primary button-large">
-                                        <?php esc_html_e('Connect to Moneybird', 'woocommerce-moneybird'); ?>
+                                        <?php esc_html_e('Connect to Moneybird', 'moneybird-for-woocommerce'); ?>
                                     </button>
                                 </p>
                             </form>
@@ -102,7 +102,7 @@ class Settings {
         ?>
         <div class="wc-moneybird-main-settings">
             <div class="wc-moneybird-card">
-                <h2><?php esc_html_e('Sync Settings', 'woocommerce-moneybird'); ?></h2>
+                <h2><?php esc_html_e('Sync Settings', 'moneybird-for-woocommerce'); ?></h2>
 
                 <form method="post" action="">
                     <?php wp_nonce_field('wc_moneybird_settings', 'wc_moneybird_settings_nonce'); ?>
@@ -110,14 +110,14 @@ class Settings {
                     <table class="form-table">
                         <tr>
                             <th scope="row">
-                                <label for="ledger_account_id"><?php esc_html_e('Ledger Account', 'woocommerce-moneybird'); ?></label>
+                                <label for="ledger_account_id"><?php esc_html_e('Ledger Account', 'moneybird-for-woocommerce'); ?></label>
                             </th>
                             <td>
                                 <?php if (is_wp_error($ledger_accounts)): ?>
                                     <p class="error"><?php echo esc_html($ledger_accounts->get_error_message()); ?></p>
                                 <?php else: ?>
                                     <select id="ledger_account_id" name="ledger_account_id" class="regular-text">
-                                        <option value=""><?php esc_html_e('Select a ledger account', 'woocommerce-moneybird'); ?></option>
+                                        <option value=""><?php esc_html_e('Select a ledger account', 'moneybird-for-woocommerce'); ?></option>
                                         <?php foreach ($ledger_accounts as $account): ?>
                                             <option value="<?php echo esc_attr($account['id']); ?>"
                                                     <?php selected($ledger_account_id, $account['id']); ?>>
@@ -126,7 +126,7 @@ class Settings {
                                         <?php endforeach; ?>
                                     </select>
                                     <p class="description">
-                                        <?php esc_html_e('The ledger account to use for WooCommerce order line items.', 'woocommerce-moneybird'); ?>
+                                        <?php esc_html_e('The ledger account to use for WooCommerce order line items.', 'moneybird-for-woocommerce'); ?>
                                     </p>
                                 <?php endif; ?>
                             </td>
@@ -134,14 +134,14 @@ class Settings {
 
                         <tr>
                             <th scope="row">
-                                <label for="tax_rate_id"><?php esc_html_e('Default Tax Rate', 'woocommerce-moneybird'); ?></label>
+                                <label for="tax_rate_id"><?php esc_html_e('Default Tax Rate', 'moneybird-for-woocommerce'); ?></label>
                             </th>
                             <td>
                                 <?php if (is_wp_error($tax_rates)): ?>
                                     <p class="error"><?php echo esc_html($tax_rates->get_error_message()); ?></p>
                                 <?php else: ?>
                                     <select id="tax_rate_id" name="tax_rate_id" class="regular-text">
-                                        <option value=""><?php esc_html_e('No default tax rate', 'woocommerce-moneybird'); ?></option>
+                                        <option value=""><?php esc_html_e('No default tax rate', 'moneybird-for-woocommerce'); ?></option>
                                         <?php foreach ($tax_rates as $rate): ?>
                                             <option value="<?php echo esc_attr($rate['id']); ?>"
                                                     <?php selected($tax_rate_id, $rate['id']); ?>>
@@ -150,7 +150,7 @@ class Settings {
                                         <?php endforeach; ?>
                                     </select>
                                     <p class="description">
-                                        <?php esc_html_e('The default tax rate to apply to invoice lines. Will only be applied if it matches the WooCommerce tax amount.', 'woocommerce-moneybird'); ?>
+                                        <?php esc_html_e('The default tax rate to apply to invoice lines. Will only be applied if it matches the WooCommerce tax amount.', 'moneybird-for-woocommerce'); ?>
                                     </p>
                                 <?php endif; ?>
                             </td>
@@ -158,19 +158,19 @@ class Settings {
 
                         <tr>
                             <th scope="row">
-                                <label for="sync_on_status"><?php esc_html_e('Sync When Order Status', 'woocommerce-moneybird'); ?></label>
+                                <label for="sync_on_status"><?php esc_html_e('Sync When Order Status', 'moneybird-for-woocommerce'); ?></label>
                             </th>
                             <td>
                                 <select id="sync_on_status" name="sync_on_status" class="regular-text">
                                     <option value="processing" <?php selected($sync_on_status, 'processing'); ?>>
-                                        <?php esc_html_e('Processing', 'woocommerce-moneybird'); ?>
+                                        <?php esc_html_e('Processing', 'moneybird-for-woocommerce'); ?>
                                     </option>
                                     <option value="completed" <?php selected($sync_on_status, 'completed'); ?>>
-                                        <?php esc_html_e('Completed', 'woocommerce-moneybird'); ?>
+                                        <?php esc_html_e('Completed', 'moneybird-for-woocommerce'); ?>
                                     </option>
                                 </select>
                                 <p class="description">
-                                    <?php esc_html_e('Orders will be synced to Moneybird when they transition to this status.', 'woocommerce-moneybird'); ?>
+                                    <?php esc_html_e('Orders will be synced to Moneybird when they transition to this status.', 'moneybird-for-woocommerce'); ?>
                                 </p>
                             </td>
                         </tr>
@@ -178,25 +178,26 @@ class Settings {
 
                     <p class="submit">
                         <button type="submit" name="action" value="save_settings" class="button button-primary">
-                            <?php esc_html_e('Save Settings', 'woocommerce-moneybird'); ?>
+                            <?php esc_html_e('Save Settings', 'moneybird-for-woocommerce'); ?>
                         </button>
                         <button type="submit" name="action" value="reset" class="button button-secondary"
-                                onclick="return confirm('<?php esc_attr_e('Are you sure you want to reset all settings? This will disconnect your Moneybird account.', 'woocommerce-moneybird'); ?>');">
-                            <?php esc_html_e('Reset Settings', 'woocommerce-moneybird'); ?>
+                                onclick="return confirm('<?php esc_attr_e('Are you sure you want to reset all settings? This will disconnect your Moneybird account.', 'moneybird-for-woocommerce'); ?>');">
+                            <?php esc_html_e('Reset Settings', 'moneybird-for-woocommerce'); ?>
                         </button>
                     </p>
                 </form>
 
                 <div class="wc-moneybird-connection-status">
-                    <h3><?php esc_html_e('Connection Status', 'woocommerce-moneybird'); ?></h3>
+                    <h3><?php esc_html_e('Connection Status', 'moneybird-for-woocommerce'); ?></h3>
                     <p>
                         <span class="dashicons dashicons-yes-alt" style="color: #46b450;"></span>
-                        <?php esc_html_e('Connected to Moneybird', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('Connected to Moneybird', 'moneybird-for-woocommerce'); ?>
                     </p>
                     <p class="description">
                         <?php
+                        /* translators: %s: The Moneybird administration ID */
                         printf(
-                            esc_html__('Administration ID: %s', 'woocommerce-moneybird'),
+                            esc_html__('Administration ID: %s', 'moneybird-for-woocommerce'),
                             '<code>' . esc_html(get_option('wc_moneybird_administration_id')) . '</code>'
                         );
                         ?>
@@ -212,7 +213,7 @@ class Settings {
             return;
         }
 
-        $action = sanitize_text_field($_POST['action']);
+        $action = sanitize_text_field(wp_unslash($_POST['action']));
 
         if ($action === 'setup') {
             $this->handle_setup();
@@ -225,18 +226,18 @@ class Settings {
 
     private function handle_setup() {
         if (!isset($_POST['wc_moneybird_setup_nonce']) ||
-            !wp_verify_nonce($_POST['wc_moneybird_setup_nonce'], 'wc_moneybird_setup')) {
-            wp_die(esc_html__('Security check failed', 'woocommerce-moneybird'));
+            !wp_verify_nonce(wp_unslash($_POST['wc_moneybird_setup_nonce']), 'wc_moneybird_setup')) {
+            wp_die(esc_html__('Security check failed', 'moneybird-for-woocommerce'));
         }
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(esc_html__('You do not have permission to access this page', 'woocommerce-moneybird'));
+            wp_die(esc_html__('You do not have permission to access this page', 'moneybird-for-woocommerce'));
         }
 
-        $api_token = sanitize_text_field($_POST['api_token']);
+        $api_token = isset($_POST['api_token']) ? sanitize_text_field(wp_unslash($_POST['api_token'])) : '';
 
         if (empty($api_token)) {
-            add_settings_error('wc_moneybird', 'empty_token', __('Please enter an API token', 'woocommerce-moneybird'));
+            add_settings_error('wc_moneybird', 'empty_token', __('Please enter an API token', 'moneybird-for-woocommerce'));
             return;
         }
 
@@ -250,7 +251,8 @@ class Settings {
                 'wc_moneybird',
                 'invalid_token',
                 sprintf(
-                    __('Invalid API token: %s', 'woocommerce-moneybird'),
+                    /* translators: %s: The error message from the API */
+                    __('Invalid API token: %s', 'moneybird-for-woocommerce'),
                     $administrations->get_error_message()
                 )
             );
@@ -258,7 +260,7 @@ class Settings {
         }
 
         if (empty($administrations) || !is_array($administrations)) {
-            add_settings_error('wc_moneybird', 'no_administrations', __('No administrations found for this API token', 'woocommerce-moneybird'));
+            add_settings_error('wc_moneybird', 'no_administrations', __('No administrations found for this API token', 'moneybird-for-woocommerce'));
             return;
         }
 
@@ -273,7 +275,8 @@ class Settings {
                 'wc_moneybird',
                 'insufficient_permissions',
                 sprintf(
-                    __('API token does not have sufficient permissions: %s', 'woocommerce-moneybird'),
+                    /* translators: %s: The error message describing permission issues */
+                    __('API token does not have sufficient permissions: %s', 'moneybird-for-woocommerce'),
                     $verify->get_error_message()
                 )
             );
@@ -287,7 +290,7 @@ class Settings {
         add_settings_error(
             'wc_moneybird',
             'setup_success',
-            __('Successfully connected to Moneybird!', 'woocommerce-moneybird'),
+            __('Successfully connected to Moneybird!', 'moneybird-for-woocommerce'),
             'success'
         );
 
@@ -298,17 +301,17 @@ class Settings {
 
     private function handle_save_settings() {
         if (!isset($_POST['wc_moneybird_settings_nonce']) ||
-            !wp_verify_nonce($_POST['wc_moneybird_settings_nonce'], 'wc_moneybird_settings')) {
-            wp_die(esc_html__('Security check failed', 'woocommerce-moneybird'));
+            !wp_verify_nonce(wp_unslash($_POST['wc_moneybird_settings_nonce']), 'wc_moneybird_settings')) {
+            wp_die(esc_html__('Security check failed', 'moneybird-for-woocommerce'));
         }
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(esc_html__('You do not have permission to access this page', 'woocommerce-moneybird'));
+            wp_die(esc_html__('You do not have permission to access this page', 'moneybird-for-woocommerce'));
         }
 
-        $ledger_account_id = sanitize_text_field($_POST['ledger_account_id'] ?? '');
-        $tax_rate_id = sanitize_text_field($_POST['tax_rate_id'] ?? '');
-        $sync_on_status = sanitize_text_field($_POST['sync_on_status'] ?? 'completed');
+        $ledger_account_id = isset($_POST['ledger_account_id']) ? sanitize_text_field(wp_unslash($_POST['ledger_account_id'])) : '';
+        $tax_rate_id = isset($_POST['tax_rate_id']) ? sanitize_text_field(wp_unslash($_POST['tax_rate_id'])) : '';
+        $sync_on_status = isset($_POST['sync_on_status']) ? sanitize_text_field(wp_unslash($_POST['sync_on_status'])) : 'completed';
 
         update_option('wc_moneybird_ledger_account_id', $ledger_account_id);
         update_option('wc_moneybird_tax_rate_id', $tax_rate_id);
@@ -317,7 +320,7 @@ class Settings {
         add_settings_error(
             'wc_moneybird',
             'settings_saved',
-            __('Settings saved successfully!', 'woocommerce-moneybird'),
+            __('Settings saved successfully!', 'moneybird-for-woocommerce'),
             'success'
         );
 
@@ -327,12 +330,12 @@ class Settings {
 
     private function handle_reset() {
         if (!isset($_POST['wc_moneybird_settings_nonce']) ||
-            !wp_verify_nonce($_POST['wc_moneybird_settings_nonce'], 'wc_moneybird_settings')) {
-            wp_die(esc_html__('Security check failed', 'woocommerce-moneybird'));
+            !wp_verify_nonce(wp_unslash($_POST['wc_moneybird_settings_nonce']), 'wc_moneybird_settings')) {
+            wp_die(esc_html__('Security check failed', 'moneybird-for-woocommerce'));
         }
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(esc_html__('You do not have permission to access this page', 'woocommerce-moneybird'));
+            wp_die(esc_html__('You do not have permission to access this page', 'moneybird-for-woocommerce'));
         }
 
         delete_option('wc_moneybird_api_token');
@@ -344,7 +347,7 @@ class Settings {
         add_settings_error(
             'wc_moneybird',
             'settings_reset',
-            __('Settings have been reset. Please reconnect to Moneybird.', 'woocommerce-moneybird'),
+            __('Settings have been reset. Please reconnect to Moneybird.', 'moneybird-for-woocommerce'),
             'success'
         );
 

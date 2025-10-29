@@ -24,8 +24,8 @@ class Sync_History {
 	public function add_menu_page() {
 		add_submenu_page(
 			'woocommerce',
-			__( 'Moneybird Sync History', 'woocommerce-moneybird' ),
-			__( 'Moneybird Sync', 'woocommerce-moneybird' ),
+			__( 'Moneybird Sync History', 'moneybird-for-woocommerce' ),
+			__( 'Moneybird Sync', 'moneybird-for-woocommerce' ),
 			'manage_woocommerce',
 			'wc-moneybird-sync',
 			array( $this, 'render_page' )
@@ -36,25 +36,15 @@ class Sync_History {
 	 * Render the sync history page
 	 */
 	public function render() {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . 'wc_moneybird_sync_log';
 		$per_page   = 20;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Just reading page number for pagination
 		$paged      = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 		$offset     = ( $paged - 1 ) * $per_page;
 
-		// Get total count
-		$total_items = $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+		// Get total count and logs using centralized Sync_Log class
+		$total_items = \WC_Moneybird\Sync_Log::get_total_count();
 		$total_pages = ceil( $total_items / $per_page );
-
-		// Get logs
-		$logs = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table_name} ORDER BY synced_at DESC LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			)
-		);
+		$logs = \WC_Moneybird\Sync_Log::get_all_logs($per_page, $offset);
 
 		?>
 		<div class="wrap">
@@ -63,17 +53,17 @@ class Sync_History {
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Order ID', 'woocommerce-moneybird' ); ?></th>
-						<th><?php esc_html_e( 'Moneybird Invoice ID', 'woocommerce-moneybird' ); ?></th>
-						<th><?php esc_html_e( 'Status', 'woocommerce-moneybird' ); ?></th>
-						<th><?php esc_html_e( 'Message', 'woocommerce-moneybird' ); ?></th>
-						<th><?php esc_html_e( 'Synced At', 'woocommerce-moneybird' ); ?></th>
+						<th><?php esc_html_e( 'Order ID', 'moneybird-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Moneybird Invoice ID', 'moneybird-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Status', 'moneybird-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Message', 'moneybird-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Synced At', 'moneybird-for-woocommerce' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php if ( empty( $logs ) ) : ?>
 						<tr>
-							<td colspan="5"><?php esc_html_e( 'No sync history found.', 'woocommerce-moneybird' ); ?></td>
+							<td colspan="5"><?php esc_html_e( 'No sync history found.', 'moneybird-for-woocommerce' ); ?></td>
 						</tr>
 					<?php else : ?>
 						<?php foreach ( $logs as $log ) : ?>
@@ -101,6 +91,7 @@ class Sync_History {
 				<div class="tablenav bottom">
 					<div class="tablenav-pages">
 						<?php
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- paginate_links is safe
 						echo paginate_links(
 							array(
 								'base'      => add_query_arg( 'paged', '%#%' ),

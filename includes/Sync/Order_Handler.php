@@ -65,7 +65,7 @@ class Order_Handler
 
 		// Double-check configuration
 		if (!$this->is_configured()) {
-			$this->log_sync_error($order_id, __('Moneybird is not fully configured. Please configure API token, administration, and ledger account.', 'woocommerce-moneybird'));
+			$this->log_sync_error($order_id, __('Moneybird is not fully configured. Please configure API token, administration, and ledger account.', 'moneybird-for-woocommerce'));
 			return;
 		}
 
@@ -206,7 +206,7 @@ class Order_Handler
 			$tax_rate_to_use = $this->determine_tax_rate($shipping_total, $shipping_tax);
 
 			$details_attributes[] = [
-				'description' => __('Shipping', 'woocommerce-moneybird') . ': ' . $order->get_shipping_method(),
+				'description' => __('Shipping', 'moneybird-for-woocommerce') . ': ' . $order->get_shipping_method(),
 				'price' => number_format($shipping_total, 2, '.', ''),
 				'amount' => 1,
 				'tax_rate_id' => $tax_rate_to_use,
@@ -282,7 +282,8 @@ class Order_Handler
 		// No matching tax rate found - this is an error condition
 		throw new \Exception(
 			sprintf(
-				__('No matching tax rate found in Moneybird for %.2f%%. Please add this tax rate in Moneybird or adjust your WooCommerce tax settings.', 'woocommerce-moneybird'),
+				/* translators: %s: The tax percentage that could not be matched (e.g., "21.00%") */
+				__('No matching tax rate found in Moneybird for %.2f%%. Please add this tax rate in Moneybird or adjust your WooCommerce tax settings.', 'moneybird-for-woocommerce'),
 				$actual_percentage
 			)
 		);
@@ -316,8 +317,9 @@ class Order_Handler
 			$invoice_id
 		);
 
+		/* translators: %s: HTML link to view the invoice in Moneybird */
 		$note = sprintf(
-			__('Order synced to Moneybird. View invoice: %s', 'woocommerce-moneybird'),
+			__('Order synced to Moneybird. View invoice: %s', 'moneybird-for-woocommerce'),
 			'<a href="' . esc_url($url) . '" target="_blank">' . esc_html($result['reference']) . '</a>'
 		);
 
@@ -329,19 +331,7 @@ class Order_Handler
 	 */
 	private function log_sync_success($order_id, $result)
 	{
-		global $wpdb;
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_moneybird_sync_log',
-			[
-				'order_id' => $order_id,
-				'status' => 'success',
-				'message' => __('Successfully synced to Moneybird', 'woocommerce-moneybird'),
-				'invoice_id' => $result['id'],
-				'synced_at' => current_time('mysql'),
-			],
-			['%d', '%s', '%s', '%s', '%s']
-		);
+		\WC_Moneybird\Sync_Log::log_success($order_id, $result);
 	}
 
 	/**
@@ -349,24 +339,14 @@ class Order_Handler
 	 */
 	private function log_sync_error($order_id, $message)
 	{
-		global $wpdb;
-
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_moneybird_sync_log',
-			[
-				'order_id' => $order_id,
-				'status' => 'error',
-				'message' => $message,
-				'synced_at' => current_time('mysql'),
-			],
-			['%d', '%s', '%s', '%s']
-		);
+		\WC_Moneybird\Sync_Log::log_error($order_id, $message);
 
 		// Also add an order note
 		$order = wc_get_order($order_id);
 		if ($order) {
+			/* translators: %s: The error message describing why the sync failed */
 			$order->add_order_note(
-				sprintf(__('Failed to sync to Moneybird: %s', 'woocommerce-moneybird'), $message),
+				sprintf(__('Failed to sync to Moneybird: %s', 'moneybird-for-woocommerce'), $message),
 				false,
 				true
 			);

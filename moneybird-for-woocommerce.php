@@ -8,7 +8,7 @@
  * Author: Thomas Schoffelen
  * Author URI: https://includable.com
  * License: MIT
- * Text Domain: woocommerce-moneybird
+ * Text Domain: moneybird-for-woocommerce
  * Requires Plugins: woocommerce
  */
 
@@ -29,7 +29,7 @@ function wc_moneybird_init()
     if (!class_exists('WooCommerce')) {
         add_action('admin_notices', function () {
             echo '<div class="error"><p>' .
-                esc_html__('Sync to Moneybird requires WooCommerce to be installed and active.', 'woocommerce-moneybird') .
+                esc_html__('Sync to Moneybird requires WooCommerce to be installed and active.', 'moneybird-for-woocommerce') .
                 '</p></div>';
         });
         return;
@@ -44,7 +44,7 @@ register_activation_hook(__FILE__, function () {
     if (!class_exists('WooCommerce')) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(
-            esc_html__('This plugin requires WooCommerce to be installed and active.', 'woocommerce-moneybird'),
+            esc_html__('This plugin requires WooCommerce to be installed and active.', 'moneybird-for-woocommerce'),
             'Plugin dependency check',
             ['back_link' => true]
         );

@@ -37,7 +37,7 @@ class Api_Client {
      */
     private function request($method, $endpoint, $data = []) {
         if (empty($this->api_token)) {
-            return new \WP_Error('no_api_token', __('No API token configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_api_token', __('No API token configured', 'moneybird-for-woocommerce'));
         }
 
         $url = $this->base_url . $endpoint;
@@ -68,7 +68,7 @@ class Api_Client {
         $decoded = json_decode($body, true);
 
         if ($code >= 400) {
-            $message = isset($decoded['error']) ? $decoded['error'] : __('API request failed', 'woocommerce-moneybird');
+            $message = isset($decoded['error']) ? $decoded['error'] : __('API request failed', 'moneybird-for-woocommerce');
             return new \WP_Error('api_error', $message, ['status_code' => $code, 'response' => $decoded]);
         }
 
@@ -87,7 +87,7 @@ class Api_Client {
      */
     public function verify_permissions() {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         $result = $this->get('/' . $this->administration_id . '/sales_invoices.json', ['per_page' => 1]);
@@ -104,7 +104,7 @@ class Api_Client {
      */
     public function get_ledger_accounts() {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         return $this->get('/' . $this->administration_id . '/ledger_accounts.json');
@@ -115,7 +115,7 @@ class Api_Client {
      */
     public function get_tax_rates() {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         return $this->get('/' . $this->administration_id . '/tax_rates.json');
@@ -126,7 +126,7 @@ class Api_Client {
      */
     public function find_contact_by_email($email) {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         $contacts = $this->get('/' . $this->administration_id . '/contacts.json', [
@@ -152,7 +152,7 @@ class Api_Client {
      */
     public function create_contact($data) {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         return $this->post('/' . $this->administration_id . '/contacts.json', [
@@ -165,7 +165,7 @@ class Api_Client {
      */
     public function create_external_sales_invoice($data) {
         if (empty($this->administration_id)) {
-            return new \WP_Error('no_administration_id', __('No administration ID configured', 'woocommerce-moneybird'));
+            return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
         return $this->post('/' . $this->administration_id . '/external_sales_invoices.json', [

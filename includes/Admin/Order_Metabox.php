@@ -47,7 +47,7 @@ class Order_Metabox {
 
         add_meta_box(
             'wc_moneybird_sync_status',
-            __('Moneybird Sync', 'woocommerce-moneybird'),
+            __('Moneybird Sync', 'moneybird-for-woocommerce'),
             [$this, 'render_metabox'],
             $screen,
             'side',
@@ -72,28 +72,21 @@ class Order_Metabox {
         $invoice_id = get_post_meta($order_id, '_moneybird_invoice_id', true);
         $synced_at = get_post_meta($order_id, '_moneybird_synced_at', true);
 
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wc_moneybird_sync_log';
-        $last_log = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM {$table_name} WHERE order_id = %d ORDER BY synced_at DESC LIMIT 1",
-                $order_id
-            )
-        );
+        $last_log = \WC_Moneybird\Sync_Log::get_last_log($order_id);
 
         ?>
         <div class="wc-moneybird-metabox">
             <?php if (!empty($invoice_id)): ?>
                 <p>
-                    <strong><?php esc_html_e('Status:', 'woocommerce-moneybird'); ?></strong>
+                    <strong><?php esc_html_e('Status:', 'moneybird-for-woocommerce'); ?></strong>
                     <span class="wc-moneybird-status-success">
                         <span class="dashicons dashicons-yes-alt"></span>
-                        <?php esc_html_e('Synced', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('Synced', 'moneybird-for-woocommerce'); ?>
                     </span>
                 </p>
 
                 <p>
-                    <strong><?php esc_html_e('Synced at:', 'woocommerce-moneybird'); ?></strong><br>
+                    <strong><?php esc_html_e('Synced at:', 'moneybird-for-woocommerce'); ?></strong><br>
                     <?php echo esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($synced_at))); ?>
                 </p>
 
@@ -107,22 +100,22 @@ class Order_Metabox {
                     );
                     ?>
                     <a href="<?php echo esc_url($url); ?>" target="_blank" class="button button-secondary">
-                        <?php esc_html_e('View in Moneybird', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('View in Moneybird', 'moneybird-for-woocommerce'); ?>
                         <span class="dashicons dashicons-external"></span>
                     </a>
                 </p>
 
             <?php elseif ($last_log && $last_log->status === 'error'): ?>
                 <p>
-                    <strong><?php esc_html_e('Status:', 'woocommerce-moneybird'); ?></strong>
+                    <strong><?php esc_html_e('Status:', 'moneybird-for-woocommerce'); ?></strong>
                     <span class="wc-moneybird-status-error">
                         <span class="dashicons dashicons-warning"></span>
-                        <?php esc_html_e('Sync Failed', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('Sync Failed', 'moneybird-for-woocommerce'); ?>
                     </span>
                 </p>
 
                 <p>
-                    <strong><?php esc_html_e('Error:', 'woocommerce-moneybird'); ?></strong><br>
+                    <strong><?php esc_html_e('Error:', 'moneybird-for-woocommerce'); ?></strong><br>
                     <?php echo esc_html($last_log->message); ?>
                 </p>
 
@@ -131,22 +124,23 @@ class Order_Metabox {
                             class="button button-primary wc-moneybird-sync-button"
                             data-order-id="<?php echo esc_attr($order_id); ?>"
                             data-nonce="<?php echo esc_attr(wp_create_nonce('wc_moneybird_manual_sync_' . $order_id)); ?>">
-                        <?php esc_html_e('Retry Sync', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('Retry Sync', 'moneybird-for-woocommerce'); ?>
                     </button>
                     <span class="wc-moneybird-sync-status"></span>
                 </p>
 
             <?php else: ?>
                 <p>
-                    <strong><?php esc_html_e('Status:', 'woocommerce-moneybird'); ?></strong>
-                    <?php esc_html_e('Not synced', 'woocommerce-moneybird'); ?>
+                    <strong><?php esc_html_e('Status:', 'moneybird-for-woocommerce'); ?></strong>
+                    <?php esc_html_e('Not synced', 'moneybird-for-woocommerce'); ?>
                 </p>
 
                 <p class="description">
                     <?php
                     $sync_status = get_option('wc_moneybird_sync_on_status', 'completed');
+                    /* translators: %s: The order status that triggers automatic sync (e.g., "completed" or "processing") */
                     printf(
-                        esc_html__('This order will be automatically synced when it reaches %s status.', 'woocommerce-moneybird'),
+                        esc_html__('This order will be automatically synced when it reaches %s status.', 'moneybird-for-woocommerce'),
                         '<strong>' . esc_html($sync_status) . '</strong>'
                     );
                     ?>
@@ -157,7 +151,7 @@ class Order_Metabox {
                             class="button button-secondary wc-moneybird-sync-button"
                             data-order-id="<?php echo esc_attr($order_id); ?>"
                             data-nonce="<?php echo esc_attr(wp_create_nonce('wc_moneybird_manual_sync_' . $order_id)); ?>">
-                        <?php esc_html_e('Sync Now', 'woocommerce-moneybird'); ?>
+                        <?php esc_html_e('Sync Now', 'moneybird-for-woocommerce'); ?>
                     </button>
                     <span class="wc-moneybird-sync-status"></span>
                 </p>
@@ -182,19 +176,19 @@ class Order_Metabox {
 
     public function handle_manual_sync_ajax() {
         // Verify nonce
-        $order_id = intval($_POST['order_id']);
-        $nonce = sanitize_text_field($_POST['nonce']);
+        $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 
         if (!wp_verify_nonce($nonce, 'wc_moneybird_manual_sync_' . $order_id)) {
             wp_send_json_error([
-                'message' => __('Security check failed', 'woocommerce-moneybird')
+                'message' => __('Security check failed', 'moneybird-for-woocommerce')
             ]);
         }
 
         // Check permissions
         if (!current_user_can('edit_shop_orders')) {
             wp_send_json_error([
-                'message' => __('You do not have permission to sync orders', 'woocommerce-moneybird')
+                'message' => __('You do not have permission to sync orders', 'moneybird-for-woocommerce')
             ]);
         }
 
@@ -202,7 +196,7 @@ class Order_Metabox {
         $order = wc_get_order($order_id);
         if (!$order) {
             wp_send_json_error([
-                'message' => __('Order not found', 'woocommerce-moneybird')
+                'message' => __('Order not found', 'moneybird-for-woocommerce')
             ]);
         }
 
@@ -219,21 +213,15 @@ class Order_Metabox {
 
             if (!empty($invoice_id)) {
                 wp_send_json_success([
-                    'message' => __('Order synced successfully!', 'woocommerce-moneybird')
+                    'message' => __('Order synced successfully!', 'moneybird-for-woocommerce')
                 ]);
             } else {
                 // Check sync log for error
-                global $wpdb;
-                $last_log = $wpdb->get_row(
-                    $wpdb->prepare(
-                        "SELECT * FROM {$wpdb->prefix}wc_moneybird_sync_log WHERE order_id = %d ORDER BY synced_at DESC LIMIT 1",
-                        $order_id
-                    )
-                );
+                $last_log = \WC_Moneybird\Sync_Log::get_last_log($order_id);
 
                 $error_message = $last_log && $last_log->status === 'error'
                     ? $last_log->message
-                    : __('Sync failed. Check the sync history for details.', 'woocommerce-moneybird');
+                    : __('Sync failed. Check the sync history for details.', 'moneybird-for-woocommerce');
 
                 wp_send_json_error([
                     'message' => $error_message

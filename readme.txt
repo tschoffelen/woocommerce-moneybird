@@ -2,7 +2,7 @@
 Contributors: schof
 Tags: woocommerce, moneybird, accounting, invoices, sync
 Requires at least: 5.2
-Tested up to: 6.4
+Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: MIT
@@ -42,7 +42,7 @@ Sync to Moneybird seamlessly integrates your WooCommerce store with Moneybird ac
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/woocommerce-moneybird`
+1. Upload the plugin files to `/wp-content/plugins/moneybird-for-woocommerce`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to Moneybird in the admin menu
 4. Follow the setup wizard to connect your Moneybird account

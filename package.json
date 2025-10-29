@@ -10,6 +10,6 @@
     "@wordpress/env": "^10.33.1"
   },
   "license": "MIT",
-  "repository": "https://github.com/includable/woocommerce-moneybird.git",
+  "repository": "https://github.com/includable/moneybird-for-woocommerce.git",
   "author": "Thomas Schoffelen <hi@includable.com>"
 }

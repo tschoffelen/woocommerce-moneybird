@@ -1,5 +1,5 @@
 {
-  "name": "includable/woocommerce-moneybird",
+  "name": "includable/moneybird-for-woocommerce",
   "description": "Sync WooCommerce orders to Moneybird accounting software",
   "type": "wordpress-plugin",
   "license": "MIT",
