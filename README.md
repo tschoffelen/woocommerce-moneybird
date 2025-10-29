@@ -88,18 +88,6 @@ The local environment includes:
 - WooCommerce 10.3.3
 - The plugin automatically activated
 
-### Running Tests
-
-The plugin includes PHPUnit tests:
-
-```bash
-# Install Composer dependencies
-composer install
-
-# Run tests (requires WordPress test suite)
-vendor/bin/phpunit
-```
-
 ### Project Structure
 
 ```

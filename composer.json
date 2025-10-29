@@ -1,27 +1,23 @@
 {
-    "name": "includable/woocommerce-moneybird",
-    "description": "Sync WooCommerce orders to Moneybird accounting software",
-    "type": "wordpress-plugin",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Thomas Schoffelen",
-            "email": "hi@includable.com"
-        }
-    ],
-    "require": {
-        "php": ">=7.4"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "WC_Moneybird\\": "includes/"
-        }
-    },
-    "scripts": {
-        "test": "phpunit",
-        "dump-autoload": "composer dump-autoload -o"
+  "name": "includable/woocommerce-moneybird",
+  "description": "Sync WooCommerce orders to Moneybird accounting software",
+  "type": "wordpress-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Schoffelen",
+      "email": "hi@includable.com"
     }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "WC_Moneybird\\": "includes/"
+    }
+  },
+  "scripts": {
+    "dump-autoload": "composer dump-autoload -o"
+  }
 }
