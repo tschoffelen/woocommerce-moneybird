@@ -8,12 +8,14 @@ if (!defined('ABSPATH')) {
 /**
  * Moneybird API client
  */
-class Api_Client {
+class Api_Client
+{
     private $api_token;
     private $administration_id;
     private $base_url = 'https://moneybird.com/api/v2';
 
-    public function __construct($api_token = null, $administration_id = null) {
+    public function __construct($api_token = null, $administration_id = null)
+    {
         $this->api_token = $api_token ?: get_option('wc_moneybird_api_token');
         $this->administration_id = $administration_id ?: get_option('wc_moneybird_administration_id');
     }
@@ -21,21 +23,24 @@ class Api_Client {
     /**
      * Make a GET request to the Moneybird API
      */
-    public function get($endpoint, $params = []) {
+    public function get($endpoint, $params = [])
+    {
         return $this->request('GET', $endpoint, $params);
     }
 
     /**
      * Make a POST request to the Moneybird API
      */
-    public function post($endpoint, $data = []) {
+    public function post($endpoint, $data = [])
+    {
         return $this->request('POST', $endpoint, $data);
     }
 
     /**
      * Make a request to the Moneybird API
      */
-    private function request($method, $endpoint, $data = []) {
+    private function request($method, $endpoint, $data = [])
+    {
         if (empty($this->api_token)) {
             return new \WP_Error('no_api_token', __('No API token configured', 'moneybird-for-woocommerce'));
         }
@@ -78,14 +83,16 @@ class Api_Client {
     /**
      * Get all administrations
      */
-    public function get_administrations() {
+    public function get_administrations()
+    {
         return $this->get('/administrations.json');
     }
 
     /**
      * Verify API token by fetching sales invoices
      */
-    public function verify_permissions() {
+    public function verify_permissions()
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
@@ -102,7 +109,8 @@ class Api_Client {
     /**
      * Get all ledger accounts
      */
-    public function get_ledger_accounts() {
+    public function get_ledger_accounts()
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
@@ -113,18 +121,20 @@ class Api_Client {
     /**
      * Get all tax rates
      */
-    public function get_tax_rates() {
+    public function get_tax_rates()
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
-        return $this->get('/' . $this->administration_id . '/tax_rates.json?filter=tax_rate_type:sales_invoice');
+        return $this->get('/' . $this->administration_id . '/tax_rates.json?filter=tax_rate_type:sales_invoice,active:true');
     }
 
     /**
      * Find contact by email
      */
-    public function find_contact_by_email($email) {
+    public function find_contact_by_email($email)
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
@@ -150,7 +160,8 @@ class Api_Client {
     /**
      * Create a contact
      */
-    public function create_contact($data) {
+    public function create_contact($data)
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
@@ -163,7 +174,8 @@ class Api_Client {
     /**
      * Create an external sales invoice
      */
-    public function create_external_sales_invoice($data) {
+    public function create_external_sales_invoice($data)
+    {
         if (empty($this->administration_id)) {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
