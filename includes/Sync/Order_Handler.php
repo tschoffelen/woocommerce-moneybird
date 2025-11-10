@@ -59,7 +59,7 @@ class Order_Handler
 	/**
 	 * Sync order to Moneybird
 	 */
-	public function sync_order($order_id)
+	public function sync_order($order_id, $use_default_tax = false)
 	{
 		$order = wc_get_order($order_id);
 
@@ -75,11 +75,11 @@ class Order_Handler
 			// Step 1: Get or create contact
 			$contact_id = $this->get_or_create_contact($order, $api);
 			if (is_wp_error($contact_id)) {
-				throw new \Exception($contact_id->get_error_message());
+				throw new \Exception(json_encode($contact_id->get_error_message()));
 			}
 
 			// Step 2: Prepare and create invoice with contact_id
-			$invoice_data = $this->prepare_invoice_data($order, $contact_id);
+			$invoice_data = $this->prepare_invoice_data($order, $contact_id, $use_default_tax);
 			$result = $api->create_external_sales_invoice($invoice_data);
 
 			if (is_wp_error($result)) {
@@ -97,6 +97,11 @@ class Order_Handler
 			$this->add_order_note($order, $result);
 
 		} catch (\Exception $e) {
+			if (!$use_default_tax) {
+				// Retry with default tax rate
+				$this->sync_order($order_id, true);
+				return;
+			}
 			$this->log_sync_error($order_id, $e->getMessage());
 		}
 	}
@@ -168,7 +173,7 @@ class Order_Handler
 	/**
 	 * Prepare invoice data for Moneybird
 	 */
-	private function prepare_invoice_data($order, $contact_id)
+	private function prepare_invoice_data($order, $contact_id, $use_default_tax = false)
 	{
 		$ledger_account_id = get_option('wc_moneybird_ledger_account_id');
 
@@ -179,7 +184,6 @@ class Order_Handler
 
 		// Add line items
 		foreach ($order->get_items() as $item) {
-			$product = $item->get_product();
 			$line_total = $item->get_total();
 			$line_tax = $item->get_total_tax();
 			$quantity = $item->get_quantity();
@@ -187,7 +191,7 @@ class Order_Handler
 			$price = $quantity > 0 ? ($line_total / $quantity) : 0;
 
 			// Find matching tax rate from Moneybird
-			$tax_rate_to_use = $this->determine_tax_rate($line_total, $line_tax);
+			$tax_rate_to_use = $this->determine_tax_rate($line_total, $line_tax, $use_default_tax);
 
 			$details_attributes[] = [
 				'description' => $item->get_name(),
@@ -203,7 +207,7 @@ class Order_Handler
 			$shipping_total = $order->get_shipping_total();
 			$shipping_tax = $order->get_shipping_tax();
 
-			$tax_rate_to_use = $this->determine_tax_rate($shipping_total, $shipping_tax);
+			$tax_rate_to_use = $this->determine_tax_rate($shipping_total, $shipping_tax, $use_default_tax);
 
 			$details_attributes[] = [
 				'description' => __('Shipping', 'moneybird-for-woocommerce') . ': ' . $order->get_shipping_method(),
@@ -250,8 +254,15 @@ class Order_Handler
 	 * @throws \Exception If no matching tax rate is found in Moneybird
 	 * @return string Tax rate ID from Moneybird
 	 */
-	private function determine_tax_rate($subtotal, $tax_amount)
+	private function determine_tax_rate($subtotal, $tax_amount, $use_default_tax = false)
 	{
+		if ($use_default_tax) {
+			$default_tax_rate_id = get_option('wc_moneybird_default_tax_rate_id');
+			if (!empty($default_tax_rate_id)) {
+				return $default_tax_rate_id;
+			}
+		}
+
 		// Calculate the actual tax percentage from the order
 		if ($subtotal == 0) {
 			$actual_percentage = 0;
@@ -265,7 +276,7 @@ class Order_Handler
 			$this->tax_rates_cache = $api->get_tax_rates();
 
 			if (is_wp_error($this->tax_rates_cache)) {
-				throw new \Exception('Failed to fetch tax rates from Moneybird: ' . $this->tax_rates_cache->get_error_message());
+				throw new \Exception('Failed to fetch tax rates from Moneybird: ' . json_encode($this->tax_rates_cache->get_error_message()));
 			}
 		}
 

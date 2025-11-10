@@ -118,7 +118,7 @@ class Api_Client {
             return new \WP_Error('no_administration_id', __('No administration ID configured', 'moneybird-for-woocommerce'));
         }
 
-        return $this->get('/' . $this->administration_id . '/tax_rates.json');
+        return $this->get('/' . $this->administration_id . '/tax_rates.json?filter=tax_rate_type:sales_invoice');
     }
 
     /**
