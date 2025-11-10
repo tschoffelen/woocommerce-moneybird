@@ -83,7 +83,7 @@ class Order_Handler
 			$result = $api->create_external_sales_invoice($invoice_data);
 
 			if (is_wp_error($result)) {
-				throw new \Exception($result->get_error_message());
+				throw new \Exception(json_encode($result->get_error_message()));
 			}
 
 			// Save the invoice ID
