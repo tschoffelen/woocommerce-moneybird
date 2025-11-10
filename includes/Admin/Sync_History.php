@@ -53,7 +53,7 @@ class Sync_History {
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Order ID', 'moneybird-for-woocommerce' ); ?></th>
+						<th><?php esc_html_e( 'Order', 'moneybird-for-woocommerce' ); ?></th>
 						<th><?php esc_html_e( 'Moneybird Invoice ID', 'moneybird-for-woocommerce' ); ?></th>
 						<th><?php esc_html_e( 'Status', 'moneybird-for-woocommerce' ); ?></th>
 						<th><?php esc_html_e( 'Message', 'moneybird-for-woocommerce' ); ?></th>

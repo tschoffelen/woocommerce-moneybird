@@ -114,8 +114,9 @@ class Order_Handler
 		$customer_id = $order->get_customer_id();
 		$email = $order->get_billing_email();
 
-		// Check if we have a stored contact ID for this customer
+		// Existing customer
 		if ($customer_id > 0) {
+			// Check if we have a stored contact ID for this customer
 			$stored_contact_id = get_user_meta($customer_id, '_moneybird_contact_id', true);
 			if (!empty($stored_contact_id)) {
 				return $stored_contact_id;
@@ -151,7 +152,7 @@ class Order_Handler
 			'country' => $order->get_billing_country(),
 			'email' => $email,
 			'phone' => $order->get_billing_phone(),
-			'customer_id' => 'wc_' . ($customer_id > 0 ? $customer_id : $order->get_id()), // External reference
+			'customer_id' => 'wc_' . ($customer_id > 0 ? $customer_id : 'o_' . $order->get_id()), // External reference
 		];
 
 		$result = $api->create_contact($contact_data);
@@ -223,7 +224,7 @@ class Order_Handler
 			$fee_total = $fee->get_total();
 			$fee_tax = $fee->get_total_tax();
 
-			$tax_rate_to_use = $this->determine_tax_rate($fee_total, $fee_tax);
+			$tax_rate_to_use = $this->determine_tax_rate($fee_total, $fee_tax, $use_default_tax);
 
 			$details_attributes[] = [
 				'description' => $fee->get_name(),
